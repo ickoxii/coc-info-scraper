@@ -1,8 +1,8 @@
 package io.github.ickoxii;
 
-// import io.github.lycoon.clashapi.ClashAPI;
-// import io.github.lycoon.clashapi.api.ClashAPIException;
-// import io.github.lycoon.clashapi.domain.player.Player;
+import com.lycoon.clashapi.core.ClashAPI;
+import com.lycoon.clashapi.core.exceptions.ClashAPIException;
+import com.lycoon.clashapi.models.player.Player;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
@@ -29,8 +29,10 @@ public class APIController {
         String algorithm = new String();
         try {
             algorithm = JWT.decode(token).getAlgorithm();
+            System.out.println("Algorithm Decoded");
         } catch (JWTDecodeException ex) {
             System.err.println("Error decoding JWT token: " + ex.getMessage());
+            return null;
         }
         return algorithm;
     }
@@ -49,9 +51,11 @@ public class APIController {
 
         try {
             token = br.readLine();
+            System.out.println("Finished reading token");
         } catch(IOException ex) {
-            System.err.println("error reading token");
+            System.err.println("Error: " + ex.getMessage());
             ex.printStackTrace();
+            return null;
         }
 
         return token;
@@ -65,6 +69,6 @@ public class APIController {
         String apiToken = apic.getAPIToken(API_TOKEN_FILE_NAME);
         System.out.println("apiToken: " + apiToken);
 
-        // ClashAPI clashAPI = new ClashAPI(apiToken);
+        ClashAPI clashAPI = new ClashAPI(apiToken);
     }
 }

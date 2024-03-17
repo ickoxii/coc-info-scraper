@@ -1,5 +1,8 @@
-package org.ickoxii;
+package io.github.ickoxii;
 
+// import io.github.lycoon.clashapi.ClashAPI;
+// import io.github.lycoon.clashapi.api.ClashAPIException;
+// import io.github.lycoon.clashapi.domain.player.Player;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
@@ -58,25 +61,10 @@ public class APIController {
         APIController apic = new APIController();
         DecodedJWT decodedJWT;
 
-        String apiUrl = CLANS_URL;
+        String apiUrl = CLANS_URL + LAR_CLAN_TAG;
         String apiToken = apic.getAPIToken(API_TOKEN_FILE_NAME);
         System.out.println("apiToken: " + apiToken);
 
-        System.out.println("Signing Algorithm: " + apic.getSigningAlgorithm(apiToken));
-
-        try {
-            Algorithm algo = Algorithm.HMAC512(apiToken);
-            JWTVerifier verifier = JWT.require(algo)
-                // specify any specific claim validations
-                .withIssuer("auth0")
-                // reusable verifier instance
-                .build();
-
-            decodedJWT = verifier.verify(apiToken);
-            System.out.println("JWT Verification Successful!");
-        } catch (JWTVerificationException ex) {
-            System.err.println("Error: " + ex.getMessage());
-            System.exit(-1);
-        }
+        // ClashAPI clashAPI = new ClashAPI(apiToken);
     }
 }

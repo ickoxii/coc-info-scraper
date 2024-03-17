@@ -1,4 +1,4 @@
-package org.ickoxii;
+package io.github.ickoxii;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;

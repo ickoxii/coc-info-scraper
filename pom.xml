@@ -38,15 +38,6 @@
             <version>4.4.0</version>
         </dependency>
 
-        <!-- discord jda - coc api discord wrapper -->
-        <!-- gh: https://github.com/discord-jda/JDA -->
-        <!-- wiki: https://jda.wiki/ -->
-        <!-- javadoc: https://docs.jda.wiki/ -->
-        <dependency>
-            <groupId>net.dv8tion</groupId>
-            <artifactId>JDA</artifactId>
-            <version>VERSION</version>
-        </dependency>
     </dependencies>
 
     <build>

@@ -1,6 +1,6 @@
 package io.github.ickoxii.interfaces.implementations;
 
-import io.github.ickoxii.interfaces.APIController;
+import io.github.ickoxii.interfaces.api.APIController;
 
 import java.io.BufferedReader;
 import java.io.InputStream;

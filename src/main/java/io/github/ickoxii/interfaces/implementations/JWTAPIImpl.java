@@ -1,6 +1,6 @@
 package io.github.ickoxii.interfaces.implementations;
 
-import io.github.ickoxii.interfaces.JWTAPIController;
+import io.github.ickoxii.interfaces.api.JWTAPIController;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;

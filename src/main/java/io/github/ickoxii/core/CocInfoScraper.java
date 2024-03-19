@@ -81,10 +81,13 @@ class CocInfoScraper
         "#QU0J2P98Y",   // tinysticky
         "#Q22Y0Y9Y8",   // th9 Soul
         "#G9UQPLQRJ",   // Tiny Soul
-        // "#Q8J9J0QP"     // th2 Soul
+        "#Q8J9J0QP"     // th2 Soul
     };
 
     private static ClashAPI clashAPI;
+    // private static Player Souls;
+    private static List<Player> myAccounts;
+    private Set<Clan> myClans;
 
     // >>>> APIController >>>>
     @Override
@@ -129,8 +132,25 @@ class CocInfoScraper
         System.out.println(player.getName() + " | " + league);
         System.out.println("Town Hall: " + townhallLevel);
         System.out.println("Role: " + clanRole.name());
-
+        System.out.println("Best Trophies: " + player.getBestTrophies());
+        System.out.println("Current Trophies: " + player.getTrophies());
         System.out.println("-----");
+
+        for(Troop hero : player.getHeroes()) {
+            System.out.println(hero.getName() + "," + hero.getLevel());
+        }
+        System.out.println("-----");
+
+        for(Troop troop : player.getTroops()) {
+            System.out.println(troop.getName() + "," + troop.getLevel());
+        }
+        System.out.println("-----");
+
+        for(Troop spell : player.getSpells()) {
+            System.out.println(spell.getName() + "," + spell.getLevel());
+        }
+
+        System.out.println("**********");
     }
 
     @Override
@@ -191,6 +211,29 @@ class CocInfoScraper
     // <<<< ClanServices <<<<
     
     // >>>> CocInfoScraper >>>>
+    public CocInfoScraper() {
+        String apiToken = getAPIToken(API_TOKEN_FILE_NAME);
+        if (DEBUG) System.out.println("apiToken: " + apiToken);
+
+        clashAPI = new ClashAPI(apiToken);
+
+        try {
+            for(String tag : ACCOUNT_TAGS) {
+                Player player = clashAPI.getPlayer(tag);
+                myAccounts.add(player);
+                PlayerClan pClan = player.getClan();
+                String cTag = pClan.getTag();
+                Clan clan = clashAPI.getClan(cTag);
+                myClans.add(clan);
+            }
+            // Souls = clashAPI.getPlayer("#C2J2QRRQ");
+        } catch (IOException ex) {
+            handle(ex, "IOException getting account");
+        } catch (ClashAPIException ex) {
+            handle(ex, "ClashAPIException getting account");
+        }
+    }
+
     List<Player> clanMembersToPlayers(List<ClanMember> members) {
         List<Player> players = new ArrayList<>();
 
@@ -229,7 +272,7 @@ class CocInfoScraper
         ex.printStackTrace();
     }
 
-    private String getClanFileName(Clan clan) {
+    private String getStandardizedClanFileName(Clan clan) {
         String clanName = clan.getName();
         clanName = clanName.replaceAll("[^a-zA-z ]", "");
         clanName = clanName.replaceAll(" ", "-");
@@ -240,16 +283,61 @@ class CocInfoScraper
         }
         return clanName + "-" + tag + ".csv";
     }
+
+    private void printMemberHeroes(Clan clan, String path) {
+        List<ClanMember> memberList = clan.getMemberList();
+        List<String> memberTags = new ArrayList<>();
+
+        for(ClanMember member : memberList) {
+            memberTags.add(member.getTag());
+        }
+
+        System.out.println("printing to " + path);
+        System.out.println("Clan: " + clan.getName());
+
+        try (FileWriter writer = new FileWriter(path)) {
+            File outputFile = new File(path);
+
+            writer.write(clan.getName() + "," + clan.getClanLevel() + "," + clan.getMembers());
+
+            for(ClanMember clanMember : clan.getMemberList()) {
+                System.out.println(clanMember.getName() + "," + clanMember.getTag());
+            }
+
+            writer.close();
+
+        } catch (IOException ex) {
+            handle(ex, "Error writting to file " + clan.getName() + ".csv");
+        }
+
+
+        // for(String tag : memberTags) {
+        //     try {
+        //         Player player = clashAPI.getPlayer(tag);
+        //         String str = player.getName() + ",";
+        //         for(Troop hero : player.getHeroes()) {
+        //             str = str + hero.getLevel() + ",";
+        //         }
+        //         System.out.println(str);
+        //         writer.write(str);
+        //     } catch (IOException ex) {
+        //         handle(ex, "IOException in printMemberHeroes");
+        //     } catch (ClashAPIException ex) {
+        //         handle(ex, "ClashAPIException in printMemberHeroes");
+        //     }
+        // }
+    }
+
+    private void printMemberTroops(Clan clan, String path) {
+
+    }
+
+
     // <<<< CocInfoScraper <<<<
 
     public static void main(String args[]) {
 
         CocInfoScraper scraper = new CocInfoScraper();
-
-        String apiToken = scraper.getAPIToken(API_TOKEN_FILE_NAME);
-        if (DEBUG) System.out.println("apiToken: " + apiToken);
-
-        clashAPI = new ClashAPI(apiToken);
 
         Set<Clan> myClans = new HashSet<>();
         Set<PlayerClan> myPlayerClans = new HashSet<>();
@@ -273,21 +361,23 @@ class CocInfoScraper
             String tag = new String();
             try {
                 Player player = clashAPI.getPlayer(account);
-                tag = player.getClan().getTag();
-                myPlayerClans.add(player.getClan());
-                try {
-                    Clan clan = clashAPI.getClan(tag);
-                    myClans.add(clan);
-                } catch (MissingFieldException ex) { 
-                    // Just in case theres no FUCKING Clan Capital
-                    // Jesus Christ I spent so much of my life trying
-                    // to figure out this god-forsaken "ohhh kotlin cant do this, kotlin cant do that" error
-                    // how bout "kotlin can suck my ass"
-                    System.err.println("Skipping " + tag);
-                } catch (IOException ex) {
-                    handle(ex, "IOException getting clan " + tag);
-                } catch (ClashAPIException ex) {
-                    handle(ex, "ClashAPIException getting clan " + tag);
+                if(player.getClan() != null) {
+                    tag = player.getClan().getTag();
+                    myPlayerClans.add(player.getClan());
+                    try {
+                        Clan clan = clashAPI.getClan(tag);
+                        myClans.add(clan);
+                    } catch (MissingFieldException ex) { 
+                        // Just in case theres no FUCKING Clan Capital
+                        // Jesus Christ I spent so much of my life trying
+                        // to figure out this god-forsaken "ohhh kotlin cant do this, kotlin cant do that" error
+                        // how bout "kotlin can suck my ass"
+                        System.err.println("Skipping " + tag);
+                    } catch (IOException ex) {
+                        handle(ex, "IOException getting clan " + tag);
+                    } catch (ClashAPIException ex) {
+                        handle(ex, "ClashAPIException getting clan " + tag);
+                    }
                 }
             } catch (IOException ex) {
                 handle(ex, "IOException getting player " + account);
@@ -297,22 +387,30 @@ class CocInfoScraper
         }
         System.out.println("-----");
 
+        // Operate and print
         for(Clan clan : myClans) {
-            // int levelWidth = 3;
-            // int nameWidth = 15;
-            // String formatted = String.format("%-" + levelWidth + "s%-" + nameWidth + "s %s", clan.getClanLevel(), clan.getName(), clan.getWarLeague().getName());
-            // System.out.println(formatted);
+            String fileName = scraper.getStandardizedClanFileName(clan);
 
-            String fileName = "target/output/" + scraper.getClanFileName(clan);
-            System.out.println("printing to " + fileName);
-            try (FileWriter writer = new FileWriter(fileName)) {
-                File outputFile = new File(fileName);
-                writer.write("Member Name,Member Tag,Town Hall,War Stars");
-                // List<ClanMember> clanMember = scraper.get
-            } catch (IOException ex) {
-                handle(ex, "Error writting to file " + clan.getName() + ".csv");
-            }
+            // scraper.printMemberHeroes(clan, "target/output/heroes-" + fileName);
+            // scraper.printMemberTroops(clan, "target/output/troops-" + fileName);
+
         }
+
+        // scraper.printPlayerInformation(Souls);
+
+        try {
+            for(String tag : ACCOUNT_TAGS) {
+                Player player = clashAPI.getPlayer(tag);
+
+                scraper.printPlayerInformation(player);
+                System.out.println("");
+            }
+        } catch (IOException ex) {
+            handle(ex, "IOE main");
+        } catch (ClashAPIException ex) {
+            handle(ex, "CAE main");
+        }
+
         System.out.println("-----");
     }
 }

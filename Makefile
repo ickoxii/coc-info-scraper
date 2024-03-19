@@ -1,4 +1,4 @@
-JAR := target/coc-info-scraper-0.0.1-SNAPSHOT.jar
+JAR := target/coc-info-scraper-1.0.0-SNAPSHOT.jar
 OUT := target/output/logs
 
 build:

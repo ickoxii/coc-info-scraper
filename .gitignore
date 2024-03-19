@@ -5,5 +5,6 @@ dependency-reduced-pom.xml
 
 target/*/
 src/main/resources/api-token
+src/main/resources/ip-addresses
 
 .idea/

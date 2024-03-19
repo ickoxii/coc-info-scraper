@@ -19,6 +19,10 @@
 
 package io.github.ickoxii.core;
 
+import kotlinx.serialization.MissingFieldException;
+
+import com.lycoon.clashapi.core.ClashAPI;
+import com.lycoon.clashapi.core.exceptions.ClashAPIException;
 import com.lycoon.clashapi.models.common.*;
 import com.lycoon.clashapi.models.league.BuilderBaseLeague;
 import com.lycoon.clashapi.models.league.League;
@@ -27,7 +31,10 @@ import com.lycoon.clashapi.models.player.enums.*;
 
 import java.util.List;
 
-public class PlayerInfo {
+public class PlayerHandler {
+    private static ClashAPI clashAPI;
+    private Player player;
+
     private String tag;
     private String name;
     private PlayerHouse playerHouse;
@@ -65,7 +72,10 @@ public class PlayerInfo {
     private int donations;
     private int donationsreceived;
 
-    public PlayerInfo(Player player) {
+    public PlayerHandler(ClashAPI clashAPI_, Player player_) {
+        clashAPI = clashAPI_;
+        player = player_;
+
         tag = player.getTag();
         name = player.getName();
         playerHouse = player.getPlayerHouse();
@@ -102,7 +112,6 @@ public class PlayerInfo {
         versusBattleWins = player.getVersusBattleWins();
         donations = player.getDonations();
         donationsreceived = player.getDonationsReceived();
-
     }
 
     public String getTag() {

@@ -19,6 +19,10 @@
 
 package io.github.ickoxii.core;
 
+import kotlinx.serialization.MissingFieldException;
+
+import com.lycoon.clashapi.core.ClashAPI;
+import com.lycoon.clashapi.core.exceptions.ClashAPIException;
 import com.lycoon.clashapi.models.capital.ClanCapital;
 import com.lycoon.clashapi.models.clan.*;
 import com.lycoon.clashapi.models.clan.enums.*;
@@ -28,7 +32,10 @@ import com.lycoon.clashapi.models.warleague.WarLeague;
 
 import java.util.List;
 
-public class ClanInfo {
+public class ClanHandler {
+    private static ClashAPI clashAPI;
+    private Clan clan;
+
     private InviteType inviteType;
 
     private boolean isFamilyFriendly;
@@ -63,7 +70,10 @@ public class ClanInfo {
     private int warTies;
     private int warLosses;
 
-    public ClanInfo(Clan clan) {
+    public ClanHandler(ClashAPI clashAPI_, Clan clan_) {
+        clashAPI = clashAPI_;
+        clan = clan_;
+
         inviteType = clan.getInviteType();
 
         isFamilyFriendly = clan.isFamilyFriendly();

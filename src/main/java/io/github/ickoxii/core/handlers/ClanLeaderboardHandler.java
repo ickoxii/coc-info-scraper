@@ -41,6 +41,7 @@ import io.github.ickoxii.models.Pair;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
+import java.util.function.Function;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -125,37 +126,37 @@ public class ClanLeaderboardHandler {
 
             writer.write("-----" + System.lineSeparator());
             writer.write("Achievement Leaderboards" + System.lineSeparator());
-            writeElement(writer, "Gold Grab", getHighest(GOLD_GRAB));
-            writeElement(writer, "Elixir Escapade", getHighest(ELIXIR_ESCAPADE));
-            writeElement(writer, "Heroic Heist", getHighest(HEROIC_HEIST));
-            writeElement(writer, "Well Seasoned", getHighest(WELL_SEASONED));
-            writeElement(writer, "Nice and Tidy", getHighest(NICE_AND_TIDY));
-            writeElement(writer, "Clan War Wealth", getHighest(CLAN_WAR_WEALTH));
-            writeElement(writer, "Friend in Need", getHighest(FRIEND_IN_NEED));
-            writeElement(writer, "Sharing is Caring", getHighest(SHARING_IS_CARING));
-            writeElement(writer, "Siege Sharer", getHighest(SIEGE_SHARER));
-            writeElement(writer, "War Hero", getHighest(WAR_HERO));
-            writeElement(writer, "War League Legend", getHighest(WAR_LEAGUE_LEGEND));
-            writeElement(writer, "Games Champion", getHighest(GAMES_CHAMPION));
-            writeElement(writer, "Unbreakable", getHighest(UNBREAKABLE));
-            writeElement(writer, "Sweet Victory", getHighest(SWEET_VICTORY));
-            writeElement(writer, "Conqueror", getHighest(CONQUEROR));
-            writeElement(writer, "Humiliator", getHighest(HUMILIATOR));
-            writeElement(writer, "Not So Easy This Time", getHighest(NOT_SO_EASY_THIS_TIME));
-            writeElement(writer, "Union Bustor", getHighest(UNION_BUSTOR));
-            writeElement(writer, "Bust This", getHighest(BUST_THIS));
-            writeElement(writer, "Mortar Mauler", getHighest(MORTAR_MAULER));
-            writeElement(writer, "X-Bow Exterminator", getHighest(XBOW_EXTERMINATOR));
-            writeElement(writer, "Firefighter", getHighest(FIREFIGHTER));
-            writeElement(writer, "Anti-Artillery", getHighest(ANTI_ARTILLERY));
-            writeElement(writer, "Shattered and Scattered", getHighest(SHATTERED_AND_SCATTERED));
-            writeElement(writer, "Counterspell", getHighest(COUNTERSPELL));
-            writeElement(writer, "Monolith Masher", getHighest(MONOLITH_MASHER));
-            writeElement(writer, "Superb Work", getHighest(SUPERB_WORK));
-            writeElement(writer, "Unbuild It", getHighest(UNBUILD_IT));
-            writeElement(writer, "Champion Builder", getHighest(CHAMPION_BUILDER));
-            writeElement(writer, "Aggressive Capitalism", getHighest(AGGRESSIVE_CAPITALISM));
-            writeElement(writer, "Most Valuable Clanmate", getHighest(MOST_VALUABLE_CLANMATE));
+            writeElement(writer, "Gold Grab", getHighestFromNdx(GOLD_GRAB));
+            writeElement(writer, "Elixir Escapade", getHighestFromNdx(ELIXIR_ESCAPADE));
+            writeElement(writer, "Heroic Heist", getHighestFromNdx(HEROIC_HEIST));
+            writeElement(writer, "Well Seasoned", getHighestFromNdx(WELL_SEASONED));
+            writeElement(writer, "Nice and Tidy", getHighestFromNdx(NICE_AND_TIDY));
+            writeElement(writer, "Clan War Wealth", getHighestFromNdx(CLAN_WAR_WEALTH));
+            writeElement(writer, "Friend in Need", getHighestFromNdx(FRIEND_IN_NEED));
+            writeElement(writer, "Sharing is Caring", getHighestFromNdx(SHARING_IS_CARING));
+            writeElement(writer, "Siege Sharer", getHighestFromNdx(SIEGE_SHARER));
+            writeElement(writer, "War Hero", getHighestFromNdx(WAR_HERO));
+            writeElement(writer, "War League Legend", getHighestFromNdx(WAR_LEAGUE_LEGEND));
+            writeElement(writer, "Games Champion", getHighestFromNdx(GAMES_CHAMPION));
+            writeElement(writer, "Unbreakable", getHighestFromNdx(UNBREAKABLE));
+            writeElement(writer, "Sweet Victory", getHighestFromNdx(SWEET_VICTORY));
+            writeElement(writer, "Conqueror", getHighestFromNdx(CONQUEROR));
+            writeElement(writer, "Humiliator", getHighestFromNdx(HUMILIATOR));
+            writeElement(writer, "Not So Easy This Time", getHighestFromNdx(NOT_SO_EASY_THIS_TIME));
+            writeElement(writer, "Union Bustor", getHighestFromNdx(UNION_BUSTOR));
+            writeElement(writer, "Bust This", getHighestFromNdx(BUST_THIS));
+            writeElement(writer, "Mortar Mauler", getHighestFromNdx(MORTAR_MAULER));
+            writeElement(writer, "X-Bow Exterminator", getHighestFromNdx(XBOW_EXTERMINATOR));
+            writeElement(writer, "Firefighter", getHighestFromNdx(FIREFIGHTER));
+            writeElement(writer, "Anti-Artillery", getHighestFromNdx(ANTI_ARTILLERY));
+            writeElement(writer, "Shattered and Scattered", getHighestFromNdx(SHATTERED_AND_SCATTERED));
+            writeElement(writer, "Counterspell", getHighestFromNdx(COUNTERSPELL));
+            writeElement(writer, "Monolith Masher", getHighestFromNdx(MONOLITH_MASHER));
+            writeElement(writer, "Superb Work", getHighestFromNdx(SUPERB_WORK));
+            writeElement(writer, "Unbuild It", getHighestFromNdx(UNBUILD_IT));
+            writeElement(writer, "Champion Builder", getHighestFromNdx(CHAMPION_BUILDER));
+            writeElement(writer, "Aggressive Capitalism", getHighestFromNdx(AGGRESSIVE_CAPITALISM));
+            writeElement(writer, "Most Valuable Clanmate", getHighestFromNdx(MOST_VALUABLE_CLANMATE));
 
             // writer.flush();
             writer.close();
@@ -164,25 +165,13 @@ public class ClanLeaderboardHandler {
         }
     }
 
-    private void handle(IOException ex, String msg) {
+    private void handle(Exception ex, String msg) {
         if (!msg.isEmpty()) System.err.println(msg);
-        System.err.println("IOException in ClanLeaderboardHandler: " + ex.getMessage());
+        System.err.println(ex.getMessage());
         ex.printStackTrace();
     }
 
-    private void handle(ClashAPIException ex, String msg) {
-        if (!msg.isEmpty()) System.err.println(msg);
-        System.err.println("ClashAPIException in ClanLeaderboardHandler: " + ex.getMessage());
-        ex.printStackTrace();
-    }
-
-    private void handle(MissingFieldException ex, String msg) {
-        if (!msg.isEmpty()) System.err.println(msg);
-        System.err.println("MissingFieldException in ClanLeaderboardHandler: " + ex.getMessage());
-        ex.printStackTrace();
-    }
-
-    private Pair<Integer, List<Player>> getHighest(int ndx) {
+    private Pair<Integer, List<Player>> getHighestFromNdx(int ndx) {
         int greatest = 0;
         List<Player> best = new ArrayList<>();
 
@@ -195,17 +184,38 @@ public class ClanLeaderboardHandler {
                     greatest = val;
                     best = new ArrayList<>();
                     best.add(player);
+                } else if (val == greatest) {
+                    best.add(player);
                 }
-            } catch (IOException ex) {
-                handle(ex, "");
-            } catch (ClashAPIException ex) {
-                handle(ex, "");
-            } catch (MissingFieldException ex) {
+            } catch (IOException | ClashAPIException | MissingFieldException ex) {
                 handle(ex, "");
             }
         }
 
         return new Pair<Integer, List<Player>>(greatest, best);
+    }
+
+    private Pair<Integer, List<Player>> getHighestFromValueFunction(Function<Player, Integer> vf) {
+        int greatest = 0;
+        List<Player> best = new ArrayList<>();
+
+        for (ClanMember clanMember : clan.getMemberList()) {
+            try {
+                Player player = clashAPI.getPlayer(clanMember.getTag());
+                int val = vf.apply(player);
+                if (val > greatest) {
+                    greatest = val;
+                    best = new ArrayList<>();
+                    best.add(player);
+                } else if (val == greatest) {
+                    best.add(player);
+                }
+            } catch (IOException | ClashAPIException | MissingFieldException ex) {
+                handle(ex, "");
+            }
+        }
+
+        return new Pair<>(greatest, best);
     }
 
     public ClanLeaderboardHandler(ClashAPI clashAPI_, Clan clan_) {
@@ -215,103 +225,19 @@ public class ClanLeaderboardHandler {
 
     // >>>> Current Leaderboards >>>>
     public Pair<Integer, List<Player>> getHighestDonations() {
-        int greatest = 0;
-        List<Player> best = new ArrayList<>();
-
-        for(ClanMember clanMember : clan.getMemberList()) {
-            try {
-                Player player = clashAPI.getPlayer(clanMember.getTag());
-                int val = player.getDonations();
-                if(val > greatest) {
-                    greatest = val;
-                    best = new ArrayList<>();
-                    best.add(player);
-                }
-            } catch (IOException ex) {
-                handle(ex, "");
-            } catch (ClashAPIException ex) {
-                handle(ex, "");
-            } catch (MissingFieldException ex) {
-                handle(ex, "");
-            }
-        }
-
-        return new Pair<Integer, List<Player>>(greatest, best);
+        return getHighestFromValueFunction(Player::getDonations);
     }
 
     public Pair<Integer, List<Player>> getHighestDonationsReceived() {
-        int greatest = 0;
-        List<Player> best = new ArrayList<>();
-
-        for(ClanMember clanMember : clan.getMemberList()) {
-            try {
-                Player player = clashAPI.getPlayer(clanMember.getTag());
-                int val = player.getDonationsReceived();
-                if(val > greatest) {
-                    greatest = val;
-                    best = new ArrayList<>();
-                    best.add(player);
-                }
-            } catch (IOException ex) {
-                handle(ex, "");
-            } catch (ClashAPIException ex) {
-                handle(ex, "");
-            } catch (MissingFieldException ex) {
-                handle(ex, "");
-            }
-        }
-
-        return new Pair<Integer, List<Player>>(greatest, best);
+        return getHighestFromValueFunction(Player::getDonationsReceived);
     }
 
     public Pair<Integer, List<Player>> getHighestTrophies() {
-        int greatest = 0;
-        List<Player> best = new ArrayList<>();
-
-        for(ClanMember clanMember : clan.getMemberList()) {
-            try {
-                Player player = clashAPI.getPlayer(clanMember.getTag());
-                int val = player.getTrophies();
-                if(val > greatest) {
-                    greatest = val;
-                    best = new ArrayList<>();
-                    best.add(player);
-                }
-            } catch (IOException ex) {
-                handle(ex, "");
-            } catch (ClashAPIException ex) {
-                handle(ex, "");
-            } catch (MissingFieldException ex) {
-                handle(ex, "");
-            }
-        }
-
-        return new Pair<Integer, List<Player>>(greatest, best);
+        return getHighestFromValueFunction(Player::getTrophies);
     }
 
     public Pair<Integer, List<Player>> getHighestBestTrophies() {
-        int greatest = 0;
-        List<Player> best = new ArrayList<>();
-
-        for(ClanMember clanMember : clan.getMemberList()) {
-            try {
-                Player player = clashAPI.getPlayer(clanMember.getTag());
-                int val = player.getBestTrophies();
-                if(val > greatest) {
-                    greatest = val;
-                    best = new ArrayList<>();
-                    best.add(player);
-                }
-            } catch (IOException ex) {
-                handle(ex, "");
-            } catch (ClashAPIException ex) {
-                handle(ex, "");
-            } catch (MissingFieldException ex) {
-                handle(ex, "");
-            }
-        }
-
-        return new Pair<Integer, List<Player>>(greatest, best);
+        return getHighestFromValueFunction(Player::getBestTrophies);
     }
 
     public Pair<Integer, List<Player>> getHighestLegendTrophies() {
@@ -343,304 +269,145 @@ public class ClanLeaderboardHandler {
     }
 
     public Pair<Integer, List<Player>> getHighestBuilderBaseTrophies() {
-        int greatest = 0;
-        List<Player> best = new ArrayList<>();
-
-        for(ClanMember clanMember : clan.getMemberList()) {
-            try {
-                Player player = clashAPI.getPlayer(clanMember.getTag());
-                int val = player.getBuilderBaseTrophies();
-                if(val > greatest) {
-                    greatest = val;
-                    best = new ArrayList<>();
-                    best.add(player);
-                }
-            } catch (IOException ex) {
-                handle(ex, "");
-            } catch (ClashAPIException ex) {
-                handle(ex, "");
-            } catch (MissingFieldException ex) {
-                handle(ex, "");
-            }
-        }
-
-        return new Pair<Integer, List<Player>>(greatest, best);
+        return getHighestFromValueFunction(Player::getBuilderBaseTrophies);
     }
 
     public Pair<Integer, List<Player>> getHighestBestBuilderBaseTrophies() {
-        int greatest = 0;
-        List<Player> best = new ArrayList<>();
-
-        for(ClanMember clanMember : clan.getMemberList()) {
-            try {
-                Player player = clashAPI.getPlayer(clanMember.getTag());
-                int val = player.getBestBuilderBaseTrophies();
-                if(val > greatest) {
-                    greatest = val;
-                    best = new ArrayList<>();
-                    best.add(player);
-                }
-            } catch (IOException ex) {
-                handle(ex, "");
-            } catch (ClashAPIException ex) {
-                handle(ex, "");
-            } catch (MissingFieldException ex) {
-                handle(ex, "");
-            }
-        }
-
-        return new Pair<Integer, List<Player>>(greatest, best);
-    }
-
-    public Pair<Integer, List<Player>> getHighestVersusTrophies() {
-        int greatest = 0;
-        List<Player> best = new ArrayList<>();
-
-        for(ClanMember clanMember : clan.getMemberList()) {
-            try {
-                Player player = clashAPI.getPlayer(clanMember.getTag());
-                int val = player.getVersusTrophies();
-                if(val > greatest) {
-                    greatest = val;
-                    best = new ArrayList<>();
-                    best.add(player);
-                }
-            } catch (IOException ex) {
-                handle(ex, "");
-            } catch (ClashAPIException ex) {
-                handle(ex, "");
-            } catch (MissingFieldException ex) {
-                handle(ex, "");
-            }
-        }
-
-        return new Pair<Integer, List<Player>>(greatest, best);
-    }
-
-    public Pair<Integer, List<Player>> getHighestBestVersusTrophies() {
-        int greatest = 0;
-        List<Player> best = new ArrayList<>();
-
-        for(ClanMember clanMember : clan.getMemberList()) {
-            try {
-                Player player = clashAPI.getPlayer(clanMember.getTag());
-                int val = player.getBestVersusTrophies();
-                if(val > greatest) {
-                    greatest = val;
-                    best = new ArrayList<>();
-                    best.add(player);
-                }
-            } catch (IOException ex) {
-                handle(ex, "");
-            } catch (ClashAPIException ex) {
-                handle(ex, "");
-            } catch (MissingFieldException ex) {
-                handle(ex, "");
-            }
-        }
-
-        return new Pair<Integer, List<Player>>(greatest, best);
+        return getHighestFromValueFunction(Player::getBestBuilderBaseTrophies);
     }
 
     public Pair<Integer, List<Player>> getMostAttackWins() {
-        int greatest = 0;
-        List<Player> best = new ArrayList<>();
-
-        for(ClanMember clanMember : clan.getMemberList()) {
-            try {
-                Player player = clashAPI.getPlayer(clanMember.getTag());
-                int val = player.getAttackWins();
-                if(val > greatest) {
-                    greatest = val;
-                    best = new ArrayList<>();
-                    best.add(player);
-                }
-            } catch (IOException ex) {
-                handle(ex, "");
-            } catch (ClashAPIException ex) {
-                handle(ex, "");
-            } catch (MissingFieldException ex) {
-                handle(ex, "");
-            }
-        }
-
-        return new Pair<Integer, List<Player>>(greatest, best);
+        return getHighestFromValueFunction(Player::getAttackWins);
     }
 
     public Pair<Integer, List<Player>> getMostDefenseWins() {
-        int greatest = 0;
-        List<Player> best = new ArrayList<>();
-
-        for(ClanMember clanMember : clan.getMemberList()) {
-            try {
-                Player player = clashAPI.getPlayer(clanMember.getTag());
-                int val = player.getDefenseWins();
-                if(val > greatest) {
-                    greatest = val;
-                    best = new ArrayList<>();
-                    best.add(player);
-                }
-            } catch (IOException ex) {
-                handle(ex, "");
-            } catch (ClashAPIException ex) {
-                handle(ex, "");
-            } catch (MissingFieldException ex) {
-                handle(ex, "");
-            }
-        }
-
-        return new Pair<Integer, List<Player>>(greatest, best);
-    }
-
-    public Pair<Integer, List<Player> > getMostVersusBattleWins() {
-        int greatest = 0;
-        List<Player> best = new ArrayList<>();
-
-        for(ClanMember clanMember : clan.getMemberList()) {
-            try {
-                Player player = clashAPI.getPlayer(clanMember.getTag());
-                int val = player.getVersusBattleWins();
-                if(val > greatest) {
-                    greatest = val;
-                    best = new ArrayList<>();
-                    best.add(player);
-                }
-            } catch (IOException ex) {
-                handle(ex, "");
-            } catch (ClashAPIException ex) {
-                handle(ex, "");
-            } catch (MissingFieldException ex) {
-                handle(ex, "");
-            }
-        }
-
-        return new Pair<Integer, List<Player>>(greatest, best);
+        return getHighestFromValueFunction(Player::getDefenseWins);
     }
     // <<<< Current Leaderboards <<<<
 
     // >>>> Achievement Leaderboards >>>>
     public Pair<Integer, List<Player> > getMostGoldGrab() {
-        return getHighest(GOLD_GRAB);
+        return getHighestFromNdx(GOLD_GRAB);
     }
 
     public Pair<Integer, List<Player> > getMostElixirEscapade() {
-        return getHighest(ELIXIR_ESCAPADE);
+        return getHighestFromNdx(ELIXIR_ESCAPADE);
     }
 
     public Pair<Integer, List<Player> > getMostHeroicHeist() {
-        return getHighest(HEROIC_HEIST);
+        return getHighestFromNdx(HEROIC_HEIST);
     }
 
     public Pair<Integer, List<Player> > getMostWellSeasoned() {
-        return getHighest(WELL_SEASONED);
+        return getHighestFromNdx(WELL_SEASONED);
     }
 
     public Pair<Integer, List<Player> > getMostNiceAndTidy() {
-        return getHighest(NICE_AND_TIDY);
+        return getHighestFromNdx(NICE_AND_TIDY);
     }
 
     public Pair<Integer, List<Player> > getMostClanWarWealth() {
-        return getHighest(CLAN_WAR_WEALTH);
+        return getHighestFromNdx(CLAN_WAR_WEALTH);
     }
 
     public Pair<Integer, List<Player> > getMostFriendInNeed() {
-        return getHighest(FRIEND_IN_NEED);
+        return getHighestFromNdx(FRIEND_IN_NEED);
     }
 
     public Pair<Integer, List<Player> > getMostSharingIsCaring() {
-        return getHighest(SHARING_IS_CARING);
+        return getHighestFromNdx(SHARING_IS_CARING);
     }
 
     public Pair<Integer, List<Player> > getMostSiegeSharer() {
-        return getHighest(SIEGE_SHARER);
+        return getHighestFromNdx(SIEGE_SHARER);
     }
 
     public Pair<Integer, List<Player> > getMostWarHero() {
-        return getHighest(WAR_HERO);
+        return getHighestFromNdx(WAR_HERO);
     }
 
     public Pair<Integer, List<Player> > getMostWarLeagueLegend() {
-        return getHighest(WAR_LEAGUE_LEGEND);
+        return getHighestFromNdx(WAR_LEAGUE_LEGEND);
     }
 
     public Pair<Integer, List<Player> > getMostGamesChampion() {
-        return getHighest(GAMES_CHAMPION);
+        return getHighestFromNdx(GAMES_CHAMPION);
     }
 
     public Pair<Integer, List<Player> > getMostUnbreakable() {
-        return getHighest(UNBREAKABLE);
+        return getHighestFromNdx(UNBREAKABLE);
     }
 
     public Pair<Integer, List<Player> > getMostSweetVictory() {
-        return getHighest(SWEET_VICTORY);
+        return getHighestFromNdx(SWEET_VICTORY);
     }
 
     public Pair<Integer, List<Player> > getMostConqueror() {
-        return getHighest(CONQUEROR);
+        return getHighestFromNdx(CONQUEROR);
     }
 
     public Pair<Integer, List<Player> > getMostHumiliator() {
-        return getHighest(HUMILIATOR);
+        return getHighestFromNdx(HUMILIATOR);
     }
 
     public Pair<Integer, List<Player> > getMostNotSoEasyThisTime() {
-        return getHighest(NOT_SO_EASY_THIS_TIME);
+        return getHighestFromNdx(NOT_SO_EASY_THIS_TIME);
     }
 
     public Pair<Integer, List<Player> > getMostUnionBuster() {
-        return getHighest(UNION_BUSTOR);
+        return getHighestFromNdx(UNION_BUSTOR);
     }
 
     public Pair<Integer, List<Player> > getMostBustThis() {
-        return getHighest(BUST_THIS);
+        return getHighestFromNdx(BUST_THIS);
     }
 
     public Pair<Integer, List<Player> > getMostMortarMauler() {
-        return getHighest(MORTAR_MAULER);
+        return getHighestFromNdx(MORTAR_MAULER);
     }
 
     public Pair<Integer, List<Player> > getMostXbowExterminator() {
-        return getHighest(XBOW_EXTERMINATOR);
+        return getHighestFromNdx(XBOW_EXTERMINATOR);
     }
 
     public Pair<Integer, List<Player> > getMostFirefighter() {
-        return getHighest(FIREFIGHTER);
+        return getHighestFromNdx(FIREFIGHTER);
     }
 
     public Pair<Integer, List<Player> > getMostAntiArtillery() {
-        return getHighest(ANTI_ARTILLERY);
+        return getHighestFromNdx(ANTI_ARTILLERY);
     }
 
     public Pair<Integer, List<Player> > getMostShatteredAndScattered() {
-        return getHighest(SHATTERED_AND_SCATTERED);
+        return getHighestFromNdx(SHATTERED_AND_SCATTERED);
     }
 
     public Pair<Integer, List<Player> > getMostCounterSpell() {
-        return getHighest(COUNTERSPELL);
+        return getHighestFromNdx(COUNTERSPELL);
     }
 
     public Pair<Integer, List<Player> > getMostMonolithMasher() {
-        return getHighest(MONOLITH_MASHER);
+        return getHighestFromNdx(MONOLITH_MASHER);
     }
 
     public Pair<Integer, List<Player> > getMostSuperbWork() {
-        return getHighest(SUPERB_WORK);
+        return getHighestFromNdx(SUPERB_WORK);
     }
 
     public Pair<Integer, List<Player> > getMostUnbuildIt() {
-        return getHighest(UNBUILD_IT);
+        return getHighestFromNdx(UNBUILD_IT);
     }
 
     public Pair<Integer, List<Player> > getMostChampionBuilder() {
-        return getHighest(CHAMPION_BUILDER);
+        return getHighestFromNdx(CHAMPION_BUILDER);
     }
 
     public Pair<Integer, List<Player> > getMostAggressiveCapitalism() {
-        return getHighest(AGGRESSIVE_CAPITALISM);
+        return getHighestFromNdx(AGGRESSIVE_CAPITALISM);
     }
 
     public Pair<Integer, List<Player> > getMostMostValuableClanmate() {
-        return getHighest(MOST_VALUABLE_CLANMATE);
+        return getHighestFromNdx(MOST_VALUABLE_CLANMATE);
     }
     // <<<< Achievements Leaderboards <<<<
 }

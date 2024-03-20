@@ -22,6 +22,7 @@ package io.github.ickoxii.core;
 import io.github.ickoxii.interfaces.api.APIController;
 import io.github.ickoxii.interfaces.PlayerServices;
 import io.github.ickoxii.interfaces.ClanServices;
+import io.github.ickoxii.core.handlers.ClanLeaderboardHandler;
 
 import kotlinx.serialization.MissingFieldException;
 
@@ -84,9 +85,6 @@ class CocInfoScraper
     };
 
     private static ClashAPI clashAPI;
-    private static Player Souls;
-    private static List<Player> myAccounts;
-    private Set<Clan> myClans;
 
     // >>>> APIController >>>>
     @Override
@@ -115,55 +113,6 @@ class CocInfoScraper
     // <<<< APIController <<<<
 
     // >>>> CocInfoScraper >>>>
-    public CocInfoScraper() {
-
-        String apiToken = getAPIToken(API_TOKEN_FILE_NAME);
-        myClans = new HashSet<>();
-        myAccounts = new ArrayList<>();
-        if (DEBUG) System.out.println("apiToken: " + apiToken);
-
-        clashAPI = new ClashAPI(apiToken);
-
-        try {
-            for(String tag : ACCOUNT_TAGS) {
-                Player player = clashAPI.getPlayer(tag);
-                myAccounts.add(player);
-                PlayerClan pClan = player.getClan();
-                String cTag = pClan.getTag();
-                Clan clan = clashAPI.getClan(cTag);
-                myClans.add(clan);
-                Souls = clashAPI.getPlayer(ACCOUNT_TAGS[0]);
-            }
-            // Souls = clashAPI.getPlayer("#C2J2QRRQ");
-        } catch (IOException ex) {
-            handle(ex, "IOException getting account");
-        } catch (ClashAPIException ex) {
-            handle(ex, "ClashAPIException getting account");
-        } catch (MissingFieldException ex) {
-            handle(ex, "MissingFieldException getting something");
-        }
-    }
-
-    List<Player> clanMembersToPlayers(List<ClanMember> members) {
-        List<Player> players = new ArrayList<>();
-
-        for(ClanMember member : members) {
-            String tag = member.getTag();
-            try {
-                Player player = clashAPI.getPlayer(tag);            
-                players.add(player);
-            } catch (IOException ex) {
-                handle(ex, "IOException in clanMembersToPlayers");
-                return null;
-            } catch (ClashAPIException ex) {
-                handle(ex, "ClashAPIException in clanMembersToPlayers");
-                return null;
-            }
-        }
-
-        return players;
-    }
-
     private static void handle(IOException ex, String msg) {
         if(msg != null) {
             System.err.println(msg);
@@ -191,6 +140,68 @@ class CocInfoScraper
         ex.printStackTrace();
     }
 
+    public CocInfoScraper() {
+        String apiToken = getAPIToken(API_TOKEN_FILE_NAME);
+        if (DEBUG) System.out.println("apiToken: " + apiToken);
+
+        clashAPI = new ClashAPI(apiToken);
+    }
+
+    List<Player> clanMembersToPlayers(List<ClanMember> members) {
+        List<Player> players = new ArrayList<>();
+
+        for(ClanMember member : members) {
+            String tag = member.getTag();
+            try {
+                Player player = clashAPI.getPlayer(tag);            
+                players.add(player);
+            } catch (IOException ex) {
+                handle(ex, "IOException in clanMembersToPlayers");
+                return null;
+            } catch (ClashAPIException ex) {
+                handle(ex, "ClashAPIException in clanMembersToPlayers");
+                return null;
+            }
+        }
+
+        return players;
+    }
+
+    private Set<Clan> getAccountClans(String[] accountTags) {
+        Set<PlayerClan> myPlayerClans = new HashSet<>();
+        Set<Clan> myClans = new HashSet<>();
+
+        for(String accountTag : accountTags) {
+            String clanTag = new String();
+            try {
+                Player player = clashAPI.getPlayer(accountTag);
+                if(player.getClan() != null) {
+                    clanTag = player.getClan().getTag();
+                    myPlayerClans.add(player.getClan());
+                    try {
+                        Clan clan = clashAPI.getClan(clanTag);
+                        myClans.add(clan);
+                    } catch (MissingFieldException ex) { 
+                        // Just in case theres no FUCKING Clan Capital
+                        // Jesus Christ I spent so much of my life trying
+                        // to figure out this god-forsaken "ohhh kotlin cant do this, kotlin cant do that" error
+                        // how bout "kotlin can suck my ass"
+                        handle(ex, "MissingFieldException getting clan " + clanTag);
+                    } catch (IOException ex) {
+                        handle(ex, "IOException getting clan " + clanTag);
+                    } catch (ClashAPIException ex) {
+                        handle(ex, "ClashAPIException getting clan " + clanTag);
+                    }
+                }
+            } catch (IOException ex) {
+                handle(ex, "IOException getting player " + accountTag);
+            } catch (ClashAPIException ex) {
+                handle(ex, "ClashAPIException getting player " + accountTag);
+            }
+        }
+        return myClans;
+    }
+
     private String getStandardizedClanFileName(Clan clan) {
         String clanName = clan.getName();
         clanName = clanName.replaceAll("[^a-zA-z ]", "");
@@ -202,57 +213,54 @@ class CocInfoScraper
         }
         return clanName + "-" + tag + ".csv";
     }
+
+    // prints duration in milliseconds, or seconds if > 1000 milliseconds
+    private long printExecutionTime(long start, long end, String msg) {
+        long duration = (end - start) / 1_000_000; // in milliseconds
+        if(duration >= 1_000) {
+            System.out.println(msg + ": " + (duration / 1_000) + "s");
+        } else {
+            System.out.println(msg + ": " + duration + "ms");
+        }
+        return duration;
+    }
     // <<<< CocInfoScraper <<<<
 
     public static void main(String args[]) {
+        long startTime;
+        long endTime;
+        long totalDuration = 0;
+        Set<Clan> myClans = new HashSet<>();
 
         // Dont ask
         Logger.getLogger(OkHttpClient.class.getName()).setLevel(Level.FINE);
 
         CocInfoScraper scraper = new CocInfoScraper();
 
-        Set<Clan> myClans = new HashSet<>();
-        Set<PlayerClan> myPlayerClans = new HashSet<>();
-
         // get clans associated w/ my account
-        for(String account : ACCOUNT_TAGS) {
-            String tag = new String();
-            try {
-                Player player = clashAPI.getPlayer(account);
-                if(player.getClan() != null) {
-                    tag = player.getClan().getTag();
-                    myPlayerClans.add(player.getClan());
-                    try {
-                        Clan clan = clashAPI.getClan(tag);
-                        myClans.add(clan);
-                    } catch (MissingFieldException ex) { 
-                        // Just in case theres no FUCKING Clan Capital
-                        // Jesus Christ I spent so much of my life trying
-                        // to figure out this god-forsaken "ohhh kotlin cant do this, kotlin cant do that" error
-                        // how bout "kotlin can suck my ass"
-                        System.err.println("Skipping player " + tag);
-                    } catch (IOException ex) {
-                        handle(ex, "IOException getting clan " + tag);
-                    } catch (ClashAPIException ex) {
-                        handle(ex, "ClashAPIException getting clan " + tag);
-                    }
-                }
-            } catch (IOException ex) {
-                handle(ex, "IOException getting player " + account);
-            } catch (ClashAPIException ex) {
-                handle(ex, "ClashAPIException getting player " + account);
-            }
-        }
+        startTime = System.nanoTime();
+
+        myClans = scraper.getAccountClans(ACCOUNT_TAGS);
+
+        endTime = System.nanoTime();
+        totalDuration += scraper.printExecutionTime(startTime, endTime, "Execution time getting clans");
         System.out.println("-----");
 
         // Leaderboards
         for(Clan clan : myClans) {
+            startTime = System.nanoTime();
             String fileName = scraper.getStandardizedClanFileName(clan);
             String filePath = BASE_OUTPUT_PATH + fileName;
 
             ClanLeaderboardHandler clh = new ClanLeaderboardHandler(clashAPI, clan);
 
             clh.printLeaderboards(filePath);
+
+            endTime = System.nanoTime();
+            totalDuration += scraper.printExecutionTime(startTime, endTime, "Execution time, leaderboard for " + clan.getName());
+            System.out.println("-----");
         }
+
+        System.out.println("Total execution time: " + (totalDuration / 1_000) + "s");
     }
 }

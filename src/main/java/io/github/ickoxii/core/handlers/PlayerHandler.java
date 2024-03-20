@@ -24,7 +24,7 @@
   * 2. Store Player in class, try catch getting information?
   * */
 
-package io.github.ickoxii.core;
+package io.github.ickoxii.core.handlers;
 
 import kotlinx.serialization.MissingFieldException;
 

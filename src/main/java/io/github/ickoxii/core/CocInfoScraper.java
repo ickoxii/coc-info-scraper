@@ -31,12 +31,12 @@ import com.lycoon.clashapi.models.clan.*;
 import com.lycoon.clashapi.models.league.League;
 import com.lycoon.clashapi.models.player.*;
 import com.lycoon.clashapi.models.player.enums.*;
-import com.lycoon.clashapi.models.warleague.WarLeague;
-import com.lycoon.clashapi.models.warleague.WarLeagueClan;
-import com.lycoon.clashapi.models.warleague.WarLeagueGroup;
-import com.lycoon.clashapi.models.warleague.WarLeagueMember;
-import com.lycoon.clashapi.models.warleague.WarLeagueRound;
-import com.lycoon.clashapi.models.warleague.enums.*;
+// import com.lycoon.clashapi.models.warleague.WarLeague;
+// import com.lycoon.clashapi.models.warleague.WarLeagueClan;
+// import com.lycoon.clashapi.models.warleague.WarLeagueGroup;
+// import com.lycoon.clashapi.models.warleague.WarLeagueMember;
+// import com.lycoon.clashapi.models.warleague.WarLeagueRound;
+// import com.lycoon.clashapi.models.warleague.enums.*;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -49,17 +49,13 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.HashMap;
 
 import okhttp3.OkHttpClient;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 class CocInfoScraper 
-    implements APIController, 
-               PlayerServices, 
-               ClanServices {
+    implements APIController {
 
     private static final boolean DEBUG = false;
 
@@ -105,7 +101,6 @@ class CocInfoScraper
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
         String token = new String();
 
-
         try {
             if (DEBUG) System.out.println("Reading token");
             token = br.readLine();
@@ -119,100 +114,6 @@ class CocInfoScraper
     }
     // <<<< APIController <<<<
 
-    // >>>> PlayerServices >>>>
-    @Override
-    public void printPlayerInformation(Player player) {
-        int townhallLevel = player.getTownHallLevel();
-        Role clanRole = player.getRole();
-
-        League league_ = player.getLeague();
-        String league = "unranked";
-
-        if(league_ != null) {
-            league = league_.getName();
-        }
-
-        System.out.println(player.getName() + " | " + league);
-        System.out.println("Town Hall: " + townhallLevel);
-        System.out.println("Role: " + clanRole.name());
-        System.out.println("Best Trophies: " + player.getBestTrophies());
-        System.out.println("Current Trophies: " + player.getTrophies());
-        System.out.println("-----");
-
-        for(Troop hero : player.getHeroes()) {
-            System.out.println(hero.getName() + "," + hero.getLevel());
-        }
-        System.out.println("-----");
-
-        for(Troop troop : player.getTroops()) {
-            System.out.println(troop.getName() + "," + troop.getLevel());
-        }
-        System.out.println("-----");
-
-        for(Troop spell : player.getSpells()) {
-            System.out.println(spell.getName() + "," + spell.getLevel());
-        }
-
-        System.out.println("**********");
-    }
-
-    @Override
-    public List<Player> getPlayers(String[] playerTags) {
-        List<Player> players = new ArrayList<>();
-
-        try {
-            for(String tag : playerTags) {
-                Player player = clashAPI.getPlayer(tag);
-                players.add(player);
-            }
-        } catch (IOException ex) {
-            handle(ex, "IOException in getPlayers");
-        } catch (ClashAPIException ex) {
-            handle(ex, "ClashAPIException in getPlayers");
-            return null;
-        }
-
-        return players;
-    }
-    // <<<< PlayerServices <<<<
-
-    // >>>> ClanServices >>>>
-    @Override
-    public void printClanInformation(Clan clan) {
-        System.out.println(clan.getName());
-        System.out.println(clan.getMembers());
-
-        List<ClanMember> members = clan.getMemberList();
-
-        for(ClanMember member : members) {
-            System.out.println(member.getName() + ": " + member.getRole());
-        }
-
-        System.out.println("-----");
-    }
-
-    @Override
-    public List<Clan> getClans(String[] clanTags) {
-        List<Clan> clans = new ArrayList<>();
-
-        try {
-            for(String tag : clanTags) {
-                Clan clan = clashAPI.getClan(tag);
-                clans.add(clan);
-            }
-        } catch (IOException ex) {
-            handle(ex, "IOException in getClans");
-            return null;
-        } catch (ClashAPIException ex) {
-            handle(ex, "ClashAPIException in getClans");
-            return null;
-        }
-
-        return clans;
-
-    }
-    // <<<< ClanServices <<<<
-    
     // >>>> CocInfoScraper >>>>
     public CocInfoScraper() {
 
@@ -290,7 +191,6 @@ class CocInfoScraper
         ex.printStackTrace();
     }
 
-
     private String getStandardizedClanFileName(Clan clan) {
         String clanName = clan.getName();
         clanName = clanName.replaceAll("[^a-zA-z ]", "");
@@ -302,39 +202,6 @@ class CocInfoScraper
         }
         return clanName + "-" + tag + ".csv";
     }
-
-    private void printMemberHeroes(Clan clan, String path) {
-        List<ClanMember> memberList = clan.getMemberList();
-        List<String> memberTags = new ArrayList<>();
-
-        for(ClanMember member : memberList) {
-            memberTags.add(member.getTag());
-        }
-
-        System.out.println("printing to " + path);
-        System.out.println("Clan: " + clan.getName());
-
-        try (FileWriter writer = new FileWriter(path)) {
-            File outputFile = new File(path);
-
-            writer.write(clan.getName() + "," + clan.getClanLevel() + "," + clan.getMembers());
-
-            for(ClanMember clanMember : clan.getMemberList()) {
-                System.out.println(clanMember.getName() + "," + clanMember.getTag());
-            }
-
-            writer.close();
-
-        } catch (IOException ex) {
-            handle(ex, "Error writting to file " + clan.getName() + ".csv");
-        }
-    }
-
-    private void printMemberTroops(Clan clan, String path) {
-
-    }
-
-
     // <<<< CocInfoScraper <<<<
 
     public static void main(String args[]) {
@@ -347,20 +214,7 @@ class CocInfoScraper
         Set<Clan> myClans = new HashSet<>();
         Set<PlayerClan> myPlayerClans = new HashSet<>();
 
-        // Get PlayerClans associated with my accounts
-        for(String account : ACCOUNT_TAGS) {
-            String tag = new String();
-            try {
-                Player player = clashAPI.getPlayer(account);
-                tag = player.getClan().getTag();
-            } catch (IOException ex) {
-                handle(ex, "IOException getting player " + tag);
-            } catch (ClashAPIException ex) {
-                handle(ex, "ClashAPIException getting player " + tag);
-            }
-        }
-
-        // get Clans associated with my accounts
+        // get clans associated w/ my account
         for(String account : ACCOUNT_TAGS) {
             String tag = new String();
             try {
@@ -376,7 +230,7 @@ class CocInfoScraper
                         // Jesus Christ I spent so much of my life trying
                         // to figure out this god-forsaken "ohhh kotlin cant do this, kotlin cant do that" error
                         // how bout "kotlin can suck my ass"
-                        System.err.println("Skipping " + tag);
+                        System.err.println("Skipping player " + tag);
                     } catch (IOException ex) {
                         handle(ex, "IOException getting clan " + tag);
                     } catch (ClashAPIException ex) {
@@ -391,7 +245,7 @@ class CocInfoScraper
         }
         System.out.println("-----");
 
-        // Operate and print
+        // Leaderboards
         for(Clan clan : myClans) {
             String fileName = scraper.getStandardizedClanFileName(clan);
             String filePath = BASE_OUTPUT_PATH + fileName;

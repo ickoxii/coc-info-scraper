@@ -17,7 +17,7 @@
     CocInfoScraper. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package io.github.ickoxii.core;
+package io.github.ickoxii.core.handlers;
 
 import kotlinx.serialization.MissingFieldException;
 

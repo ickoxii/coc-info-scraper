@@ -52,6 +52,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
 
+import okhttp3.OkHttpClient;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 class CocInfoScraper 
     implements APIController, 
@@ -85,7 +88,7 @@ class CocInfoScraper
     };
 
     private static ClashAPI clashAPI;
-    // private static Player Souls;
+    private static Player Souls;
     private static List<Player> myAccounts;
     private Set<Clan> myClans;
 
@@ -212,7 +215,10 @@ class CocInfoScraper
     
     // >>>> CocInfoScraper >>>>
     public CocInfoScraper() {
+
         String apiToken = getAPIToken(API_TOKEN_FILE_NAME);
+        myClans = new HashSet<>();
+        myAccounts = new ArrayList<>();
         if (DEBUG) System.out.println("apiToken: " + apiToken);
 
         clashAPI = new ClashAPI(apiToken);
@@ -225,12 +231,15 @@ class CocInfoScraper
                 String cTag = pClan.getTag();
                 Clan clan = clashAPI.getClan(cTag);
                 myClans.add(clan);
+                Souls = clashAPI.getPlayer(ACCOUNT_TAGS[0]);
             }
             // Souls = clashAPI.getPlayer("#C2J2QRRQ");
         } catch (IOException ex) {
             handle(ex, "IOException getting account");
         } catch (ClashAPIException ex) {
             handle(ex, "ClashAPIException getting account");
+        } catch (MissingFieldException ex) {
+            handle(ex, "MissingFieldException getting something");
         }
     }
 
@@ -272,6 +281,16 @@ class CocInfoScraper
         ex.printStackTrace();
     }
 
+    private static void handle(MissingFieldException ex, String msg) {
+        if(msg != null) {
+            System.err.println(msg);
+        }
+        System.err.println(ex.getMessage());
+        System.err.println("Printing Stack Trace");
+        ex.printStackTrace();
+    }
+
+
     private String getStandardizedClanFileName(Clan clan) {
         String clanName = clan.getName();
         clanName = clanName.replaceAll("[^a-zA-z ]", "");
@@ -309,23 +328,6 @@ class CocInfoScraper
         } catch (IOException ex) {
             handle(ex, "Error writting to file " + clan.getName() + ".csv");
         }
-
-
-        // for(String tag : memberTags) {
-        //     try {
-        //         Player player = clashAPI.getPlayer(tag);
-        //         String str = player.getName() + ",";
-        //         for(Troop hero : player.getHeroes()) {
-        //             str = str + hero.getLevel() + ",";
-        //         }
-        //         System.out.println(str);
-        //         writer.write(str);
-        //     } catch (IOException ex) {
-        //         handle(ex, "IOException in printMemberHeroes");
-        //     } catch (ClashAPIException ex) {
-        //         handle(ex, "ClashAPIException in printMemberHeroes");
-        //     }
-        // }
     }
 
     private void printMemberTroops(Clan clan, String path) {
@@ -336,6 +338,9 @@ class CocInfoScraper
     // <<<< CocInfoScraper <<<<
 
     public static void main(String args[]) {
+
+        // Dont ask
+        Logger.getLogger(OkHttpClient.class.getName()).setLevel(Level.FINE);
 
         CocInfoScraper scraper = new CocInfoScraper();
 
@@ -348,7 +353,6 @@ class CocInfoScraper
             try {
                 Player player = clashAPI.getPlayer(account);
                 tag = player.getClan().getTag();
-                
             } catch (IOException ex) {
                 handle(ex, "IOException getting player " + tag);
             } catch (ClashAPIException ex) {
@@ -390,27 +394,11 @@ class CocInfoScraper
         // Operate and print
         for(Clan clan : myClans) {
             String fileName = scraper.getStandardizedClanFileName(clan);
+            String filePath = BASE_OUTPUT_PATH + fileName;
 
-            // scraper.printMemberHeroes(clan, "target/output/heroes-" + fileName);
-            // scraper.printMemberTroops(clan, "target/output/troops-" + fileName);
+            ClanLeaderboardHandler clh = new ClanLeaderboardHandler(clashAPI, clan);
 
+            clh.printLeaderboards(filePath);
         }
-
-        // scraper.printPlayerInformation(Souls);
-
-        try {
-            for(String tag : ACCOUNT_TAGS) {
-                Player player = clashAPI.getPlayer(tag);
-
-                scraper.printPlayerInformation(player);
-                System.out.println("");
-            }
-        } catch (IOException ex) {
-            handle(ex, "IOE main");
-        } catch (ClashAPIException ex) {
-            handle(ex, "CAE main");
-        }
-
-        System.out.println("-----");
     }
 }

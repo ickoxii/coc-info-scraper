@@ -17,12 +17,17 @@
     CocInfoScraper. If not, see <https://www.gnu.org/licenses/>.
  */
 
+ /**
+  * 1. Store playertag in class, call API in getters
+  *     * Probably slow as shit
+  *
+  * 2. Store Player in class, try catch getting information?
+  * */
+
 package io.github.ickoxii.core;
 
 import kotlinx.serialization.MissingFieldException;
 
-import com.lycoon.clashapi.core.ClashAPI;
-import com.lycoon.clashapi.core.exceptions.ClashAPIException;
 import com.lycoon.clashapi.models.common.*;
 import com.lycoon.clashapi.models.league.BuilderBaseLeague;
 import com.lycoon.clashapi.models.league.League;
@@ -32,213 +37,213 @@ import com.lycoon.clashapi.models.player.enums.*;
 import java.util.List;
 
 public class PlayerHandler {
-    private static ClashAPI clashAPI;
     private Player player;
 
-    private String tag;
-    private String name;
-    private PlayerHouse playerHouse;
-    private PlayerClan clan;
-    private Role role;
-    private int expLevel;
-    private int trophies;
-    private int builderHallLevel;
-    private int townHallWeaponLevel;
-    private int townHallLevel;
-    private WarPreference warPreference;
-    private int warStars;
-    private List<Achievement> achievements;
-    private List<Label> labels;
-    private int clanCapitalContributions;
-    
-    private BuilderBaseLeague builderBaseLeague;
-    private League league;
-    private PlayerLegendStatistics legendStatistics;
+    private void handle(MissingFieldException ex, String msg) {
+        if(!msg.isEmpty()) System.err.println(msg);
+        System.err.println("Error in PlayerHandler: " + ex.getMessage());
+        ex.printStackTrace();
+    }
 
-    private List<Troop> troops;
-    private List<Troop> heroes;
-    private List<Troop> heroEquipment;
-    private List<Troop> spells;
-
-    private int bestTrophies;
-    private int builderBaseTrophies;
-    private int bestBuilderBaseTrophies;
-    private int versusTrophies;
-    private int bestVersusTrophies;
-
-    private int attackWins;
-    private int defenseWins;
-    private int versusBattleWins;
-    private int donations;
-    private int donationsreceived;
-
-    public PlayerHandler(ClashAPI clashAPI_, Player player_) {
-        clashAPI = clashAPI_;
+    public PlayerHandler(Player player_) {
         player = player_;
-
-        tag = player.getTag();
-        name = player.getName();
-        playerHouse = player.getPlayerHouse();
-        clan = player.getClan();
-        role = player.getRole();
-        expLevel = player.getExpLevel();
-        trophies = player.getTrophies();
-        builderHallLevel = player.getBuilderHallLevel();
-        townHallWeaponLevel = player.getTownHallWeaponLevel();
-        townHallLevel = player.getTownHallLevel();
-        warPreference = player.getWarPreference();
-        warStars = player.getWarStars();
-        achievements = player.getAchievements();
-        labels = player.getLabels();
-        clanCapitalContributions = player.getClanCapitalContributions();
-
-        builderBaseLeague = player.getBuilderBaseLeague();
-        league = player.getLeague();
-        legendStatistics = player.getLegendStatistics();
-
-        troops = player.getTroops();
-        heroes = player.getHeroes();
-        heroEquipment = player.getHeroEquipment();
-        spells = player.getSpells();
-
-        bestTrophies = player.getBestTrophies();
-        builderBaseTrophies = player.getBuilderBaseTrophies();
-        bestBuilderBaseTrophies = player.getBestBuilderBaseTrophies();
-        versusTrophies = player.getVersusTrophies();
-        bestVersusTrophies = player.getBestVersusTrophies();
-
-        attackWins = player.getAttackWins();
-        defenseWins = player.getDefenseWins();
-        versusBattleWins = player.getVersusBattleWins();
-        donations = player.getDonations();
-        donationsreceived = player.getDonationsReceived();
     }
 
     public String getTag() {
-        return tag;
+        return player.getTag();
     }
 
     public String getName() {
-        return name;
+        return player.getName();
     }
 
     public PlayerHouse getPlayerHouse() {
-        return playerHouse;
+        try {
+            return player.getPlayerHouse();
+        } catch (MissingFieldException ex) {
+            handle(ex, "in getPlayerHouse");            
+        }
+        return null;
     }
 
     public PlayerClan getClan() {
-        return clan;
+        try {
+            return player.getClan();
+        } catch (MissingFieldException ex) {
+            handle(ex, "in PlayerHandler.getClan");
+        }
+        return null;
     }
 
     public Role getRole() {
-        return role;
+        try {
+            return player.getRole();
+        } catch (MissingFieldException ex) {
+            handle(ex, "in PlayerHandler.getRole");
+        }
+        return null;
     }
 
     public int getExpLevel() {
-        return expLevel;
+        return player.getExpLevel();
     }
 
     public int getTrophies() {
-        return trophies;
+        return player.getTrophies();
     }
 
     public int getBuilderHallLevel() {
-        return builderHallLevel;
+        return player.getBuilderHallLevel();
     }
 
     public int getTownHallWeaponLevel() {
-        return townHallWeaponLevel;
+        return player.getTownHallWeaponLevel();
     }
 
     public int getTownHallLevel() {
-        return townHallLevel;
+        return player.getTownHallLevel();
     }
 
     public WarPreference getWarPreference() {
-        return warPreference;
+        return player.getWarPreference();
     }
 
     public int getWarStars() {
-        return warStars;
+        return player.getWarStars();
     }
 
     public List<Achievement> getAchievements() {
-        return achievements;
+        return player.getAchievements();
     }
 
     public List<Label> getLabels() {
-        return labels;
+        try {
+            return player.getLabels();
+        } catch (MissingFieldException ex) {
+            handle(ex, "in PlayerHandler.getLabels");
+        }
+        return null;
     }
 
     public int getClanCapitalContributions() {
-        return clanCapitalContributions;
+        return player.getClanCapitalContributions();
     }
 
     public BuilderBaseLeague getBuilderBaseLeague() {
-        return builderBaseLeague;
+        try {
+            return player.getBuilderBaseLeague();
+        } catch (MissingFieldException ex) {
+            handle(ex, "in PlayerHandler.getBuilderBaseLeague");
+        }
+        return null;
     }
 
     public League getLeague() {
-        return league;
+        try {
+            return player.getLeague();
+        } catch (MissingFieldException ex) {
+            handle(ex, "in PlayerHandler.getLeague");
+        }
+        return null;
     }
 
     public PlayerLegendStatistics getLegendStatistics() {
-        return legendStatistics;
+        try {
+            return player.getLegendStatistics();
+        } catch (MissingFieldException ex) {
+            handle(ex, "in PlayerHandler.getLegendStatistics");
+        }
+        return null;
     }
 
     public List<Troop> getTroops() {
-        return troops;
+        return player.getTroops();
     }
 
     public List<Troop> getHeroes() {
-        return heroes;
+        try {
+            return player.getHeroes();
+        } catch (MissingFieldException ex) {
+            handle(ex, "in PlayerHandler.getHeroes");
+        }
+        return null;
     }
 
     public List<Troop> getHeroEquipment() {
-        return heroEquipment;
+        try {
+            return player.getHeroEquipment();
+        } catch (MissingFieldException ex) {
+            handle(ex, "in PlayerHandler.getHeroEquipment");
+        }
+        return null;
     }
 
     public List<Troop> getSpells() {
-        return spells;
+        try {
+            return player.getSpells();
+        } catch (MissingFieldException ex) {
+            handle(ex, "in PlayerHandler.getSpells");
+        }
+        return null;
     }
 
     public int getBestTrophies() {
-        return bestTrophies;
+        return player.getBestTrophies();
     }
 
     public int getBuilderBaseTrophies() {
-        return builderBaseTrophies;
+        try {
+            return player.getBuilderBaseTrophies();
+        } catch (MissingFieldException ex) {
+            handle(ex, "in PlayerHandler.getBuilderBaseTrophies");
+        }
+        return 0;
     }
 
     public int getBestBuilderBaseTrophies() {
-        return bestBuilderBaseTrophies;
+        try {
+            return player.getBestBuilderBaseTrophies();
+        } catch (MissingFieldException ex) {
+            handle(ex, "in PlayerHandler.getBestBuilderBaseTrophies");
+        }
+        return 0;
     }
 
     public int getVersusTrophies() {
-        return versusTrophies;
+        try {
+            return player.getVersusTrophies();
+        } catch (MissingFieldException ex) {
+            handle(ex, "in PlayerHandler.getVersusTrophies");
+        }
+        return 0;
     }
 
     public int getBestVersusTrophies() {
-        return bestVersusTrophies;
+        try {
+            return player.getBestVersusTrophies();
+        } catch (MissingFieldException ex) {
+            handle(ex, "in PlayerHandler.getBestVersusTrophies");
+        }
+        return 0;
     }
 
     public int getAttackWins() {
-        return attackWins;
+        return player.getAttackWins();
     }
 
     public int getDefenseWins() {
-        return defenseWins;
+        return player.getDefenseWins();
     }
 
     public int getVersusBattleWins() {
-        return versusBattleWins;
+        return player.getVersusBattleWins();
     }
 
     public int getDonations() {
-        return donations;
+        return player.getDonations();
     }
 
-    public int getDonationsreceived() {
-        return donationsreceived;
+    public int getDonationsReceived() {
+        return player.getDonationsReceived();
     }
 }

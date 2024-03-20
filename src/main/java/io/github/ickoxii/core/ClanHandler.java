@@ -21,8 +21,6 @@ package io.github.ickoxii.core;
 
 import kotlinx.serialization.MissingFieldException;
 
-import com.lycoon.clashapi.core.ClashAPI;
-import com.lycoon.clashapi.core.exceptions.ClashAPIException;
 import com.lycoon.clashapi.models.capital.ClanCapital;
 import com.lycoon.clashapi.models.clan.*;
 import com.lycoon.clashapi.models.clan.enums.*;
@@ -33,195 +31,169 @@ import com.lycoon.clashapi.models.warleague.WarLeague;
 import java.util.List;
 
 public class ClanHandler {
-    private static ClashAPI clashAPI;
     private Clan clan;
 
-    private InviteType inviteType;
-
-    private boolean isFamilyFriendly;
-    private String tag;
-    private String name;
-    private int clanLevel;
-    private int clanPoints;
-    private String description;
-    private Language chatLanguage;
-    private List<Label> labels;
-    private Location location;
-    private BadgeUrls badgeUrls;
-    private int members;
-    private List<ClanMember> clanMembers;
-
-    private int requiredVersusTrophies;
-    private int requiredBuilderBaseTrophies;
-    private int requiredTrophies;
-    private int requiredTownhallLevel;
-
-    private int clanVersusPoints;
-    private int clanBuilderBasePoints;
-    private int clanCapitalPoints;
-    private ClanCapital clanCapital;
-
-    private boolean isWarLogPublic;
-    private WarLeague warLeague;
-    private CapitalLeague capitalLeague;
-    private WarFrequency WarFrequency;
-    private int warWinStreak;
-    private int warWins;
-    private int warTies;
-    private int warLosses;
-
-    public ClanHandler(ClashAPI clashAPI_, Clan clan_) {
-        clashAPI = clashAPI_;
-        clan = clan_;
-
-        inviteType = clan.getInviteType();
-
-        isFamilyFriendly = clan.isFamilyFriendly();
-        tag = clan.getTag();
-        name = clan.getName();
-        clanLevel = clan.getClanLevel();
-        clanPoints = clan.getClanPoints();
-        description = clan.getDescription();
-        chatLanguage = clan.getChatLanguage();
-        labels = clan.getLabels();
-        location = clan.getLocation();
-        badgeUrls = clan.getBadgeUrls();
-        members = clan.getMembers();
-        clanMembers = clan.getMemberList();
-
-        requiredVersusTrophies = clan.getRequiredVersusTrophies(); // Deprecated
-        requiredBuilderBaseTrophies = clan.getRequiredBuilderBaseTrophies();
-        requiredTrophies = clan.getRequiredTrophies();
-        requiredTownhallLevel = clan.getRequiredTownhallLevel();
-
-        clanVersusPoints = clan.getClanVersusPoints(); // Deprecated
-        clanBuilderBasePoints = clan.getClanBuilderBasePoints();
-        clanCapitalPoints = clan.getClanCapitalPoints();
-        clanCapital = clan.getClanCapital();
-
-        isWarLogPublic = clan.isWarLogPublic();
-        warLeague = clan.getWarLeague();
-        capitalLeague = clan.getCapitalLeague();
-        WarFrequency = clan.getWarFrequency();
-        warWinStreak = clan.getWarWinStreak();
-        warWins = clan.getWarWins();
-        warTies = clan.getWarTies();
-        warLosses = clan.getWarLosses();
+    private void handle(MissingFieldException ex, String msg) {
+        System.err.println(msg);
+        System.err.println("Error in ClanHandler: " + ex.getMessage());
+        ex.printStackTrace();
     }
 
+    public ClanHandler(Clan clan_) {
+        clan = clan_;
+    }
+
+    // >>>> Getters >>>>
     public InviteType getInviteType() {
-        return inviteType;
+        return clan.getInviteType();
     }
 
     public boolean isFamilyFriendly() {
-        return isFamilyFriendly;
+        return clan.isFamilyFriendly();
     }
 
     public String getTag() {
-        return tag;
+        return clan.getTag();
     }
 
     public String getName() {
-        return name;
+        return clan.getName();
     }
 
     public int getClanLevel() {
-        return clanLevel;
+        return clan.getClanLevel();
     }
 
     public int getClanPoints() {
-        return clanPoints;
+        return clan.getClanPoints();
     }
 
     public String getDescription() {
-        return description;
+        return clan.getDescription();
     }
 
     public Language getChatLanguage() {
-        return chatLanguage;
+        return clan.getChatLanguage();
     }
 
     public List<Label> getLabels() {
-        return labels;
+        return clan.getLabels();
     }
 
     public Location getLocation() {
-        return location;
+        return clan.getLocation();
     }
 
     public BadgeUrls getBadgeUrls() {
-        return badgeUrls;
+        try {
+            return clan.getBadgeUrls();
+        } catch (MissingFieldException ex) {
+            handle(ex, "in ClanHandler.getBadgeUrls");
+        }
+        return null;
     }
 
     public int getMembers() {
-        return members;
+        return clan.getMembers();
     }
 
     public List<ClanMember> getClanMembers() {
-        return clanMembers;
+        return clan.getMemberList();
     }
 
     public int getRequiredVersusTrophies() {
-        return requiredVersusTrophies;
+        try {
+            return clan.getRequiredVersusTrophies();
+        } catch (MissingFieldException ex) {
+            handle(ex, "in ClanHandler.getRequiredVersusTrophies");
+        }
+        return 0;
     }
 
     public int getRequiredBuilderBaseTrophies() {
-        return requiredBuilderBaseTrophies;
+        try {
+            return clan.getRequiredBuilderBaseTrophies();
+        } catch (MissingFieldException ex) {
+            handle(ex, "in ClanHandler.getRequiredBuilderBaseTrophies");
+        }
+        return 0;
     }
 
     public int getRequiredTrophies() {
-        return requiredTrophies;
+        return clan.getRequiredTrophies();
     }
 
     public int getRequiredTownhallLevel() {
-        return requiredTownhallLevel;
+        return clan.getRequiredTownhallLevel();
     }
 
     public int getClanVersusPoints() {
-        return clanVersusPoints;
+        return clan.getClanVersusPoints();
     }
 
     public int getClanBuilderBasePoints() {
-        return clanBuilderBasePoints;
+        return clan.getClanBuilderBasePoints();
     }
 
     public int getClanCapitalPoints() {
-        return clanCapitalPoints;
+        try {
+            return clan.getClanCapitalPoints();
+        } catch (MissingFieldException ex) {
+            handle(ex, "in ClanHandler.getClanCapitalPoints");
+        }
+        return 0;
     }
 
     public ClanCapital getClanCapital() {
-        return clanCapital;
+        try {
+            return clan.getClanCapital();
+        } catch (MissingFieldException ex) {
+            handle(ex, "in ClanHandler.getClanCapital");
+        }
+        return null;
     }
 
     public boolean isWarLogPublic() {
-        return isWarLogPublic;
+        return clan.isWarLogPublic();
     }
 
     public WarLeague getWarLeague() {
-        return warLeague;
+        try {
+            return clan.getWarLeague();
+        } catch (MissingFieldException ex) {
+            handle(ex, "in ClanHandler.getWarLeague");
+        }
+        return null;
     }
 
     public CapitalLeague getCapitalLeague() {
-        return capitalLeague;
+        try {
+            return clan.getCapitalLeague();
+        } catch (MissingFieldException ex) {
+            handle(ex, "in ClanHandler.getCapitalLeague");
+        }
+        return null;
     }
 
-    public com.lycoon.clashapi.models.clan.enums.WarFrequency getWarFrequency() {
-        return WarFrequency;
+    public WarFrequency getWarFrequency() {
+        return clan.getWarFrequency();
     }
 
     public int getWarWinStreak() {
-        return warWinStreak;
+        return clan.getWarWinStreak();
     }
 
     public int getWarWins() {
-        return warWins;
+        return clan.getWarWins();
     }
 
     public int getWarTies() {
-        return warTies;
+        return clan.getWarTies();
     }
 
     public int getWarLosses() {
-        return warLosses;
+        return clan.getWarLosses();
     }
+    // <<<< Getters <<<<
+    
 }

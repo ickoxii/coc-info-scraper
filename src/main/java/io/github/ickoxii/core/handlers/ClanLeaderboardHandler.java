@@ -142,7 +142,7 @@ public class ClanLeaderboardHandler {
                 if(currLeaders != null) {
                     writer.write("th " + i + "," + currLeaders.getFirst() + ",");
                     for(Player player : currLeaders.getSecond()) {
-                        writer.write(player.getName());
+                        writer.write(player.getName() + ",");
                     }
                     writer.write(System.lineSeparator());
                 }

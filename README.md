@@ -6,7 +6,9 @@ as well.
 
 ## Usage
 
-Account tags are located in src/main/java/io/github/ickoxii/core/CocInfoScraper.java.
+Your api-token should be stored in `src/main/resources/api-token`
+
+Account/clan tags are located in `src/main/java/io/github/ickoxii/core/CocInfoScraper.java`.
 
 ```zsh
 # build the project
@@ -25,4 +27,6 @@ achievements, such as Gold Grab or Friend in Need.
 
 ## TODO
 
-1. Add program timer in main to see how long it takes to run (hint: really slow)
+1. Do analysis of achievements across all players, i.e. median, mean, mode, quartiles, sd
+
+2. Standardize stat analysis for achievements, current season stats and exp levels

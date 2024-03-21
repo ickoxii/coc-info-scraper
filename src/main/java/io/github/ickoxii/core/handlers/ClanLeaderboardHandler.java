@@ -40,6 +40,10 @@ import com.lycoon.clashapi.models.warleague.WarLeague;
 import io.github.ickoxii.models.Pair;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 import java.util.function.Function;
 
@@ -49,6 +53,9 @@ import java.io.FileWriter;
 public class ClanLeaderboardHandler {
     ClashAPI clashAPI;
     Clan clan;
+    Set<Player> clanMembers;
+
+    private static final int MAX_TOWN_HALL_LEVEL = 16;
 
     private static final int BIGGER_COFFERS_NDX = 0;
     private static final int GET_THOSE_GOBLINS = 1;
@@ -66,7 +73,8 @@ public class ClanLeaderboardHandler {
     private static final int UNBREAKABLE = 13;
     private static final int FRIEND_IN_NEED = 14;
     private static final int MORTAR_MAULER = 15;
-    private static final int HEROIC_HEIST = 17;
+    private static final int HEROIC_HEIST = 16;
+    private static final int LEAGUE_ALL_STAR = 17;
     private static final int XBOW_EXTERMINATOR = 18;
     private static final int FIREFIGHTER = 19;
     private static final int WAR_HERO = 20;
@@ -116,15 +124,31 @@ public class ClanLeaderboardHandler {
             writeElement(writer, "Trophies", getHighestTrophies());
             writeElement(writer, "Best Trophies", getHighestBestTrophies());
             writeElement(writer, "Legend Trophies", getHighestLegendTrophies());
+            // Deprecated
             // writeElement(writer, "Versus Trophies", getHighestVersusTrophies());
             // writeElement(writer, "Best Versus Trophies", getHighestBestVersusTrophies());
             writeElement(writer, "Builder Base Trophies", getHighestBuilderBaseTrophies());
             writeElement(writer, "Best Builder Base Trophies", getHighestBestBuilderBaseTrophies());
             writeElement(writer, "Attack Wins", getMostAttackWins());
             writeElement(writer, "Defense Wins", getMostDefenseWins());
+            // Deprecated
             // writeElement(writer, "Versus Battle Wins", getMostVersusBattleWins());
-
             writer.write("-----" + System.lineSeparator());
+
+            writer.write("Highest EXP Levels" + System.lineSeparator());
+            Map<Integer, Pair<Integer, List<Player>>> leaders = getHighestEXPLvlPerThLevel();
+            for(int i = 1; i <= MAX_TOWN_HALL_LEVEL; ++i) {
+                Pair<Integer, List<Player>> currLeaders = leaders.get(i);
+                if(currLeaders != null) {
+                    writer.write("th " + i + "," + currLeaders.getFirst() + ",");
+                    for(Player player : currLeaders.getSecond()) {
+                        writer.write(player.getName());
+                    }
+                    writer.write(System.lineSeparator());
+                }
+            }
+            writer.write("-----" + System.lineSeparator());
+
             writer.write("Achievement Leaderboards" + System.lineSeparator());
             writeElement(writer, "Gold Grab", getHighestFromNdx(GOLD_GRAB));
             writeElement(writer, "Elixir Escapade", getHighestFromNdx(ELIXIR_ESCAPADE));
@@ -173,54 +197,62 @@ public class ClanLeaderboardHandler {
 
     private Pair<Integer, List<Player>> getHighestFromNdx(int ndx) {
         int greatest = 0;
-        List<Player> best = new ArrayList<>();
+        List<Player> leaders = new ArrayList<>();
 
-        for(ClanMember clanMember : clan.getMemberList()) {
+        for(Player player : clanMembers) {
             try {
-                Player player = clashAPI.getPlayer(clanMember.getTag());
                 List<Achievement> achievements = player.getAchievements();
                 int val = achievements.get(ndx).getValue();
                 if(val > greatest) {
                     greatest = val;
-                    best = new ArrayList<>();
-                    best.add(player);
+                    leaders = new ArrayList<>();
+                    leaders.add(player);
                 } else if (val == greatest) {
-                    best.add(player);
+                    leaders.add(player);
                 }
-            } catch (IOException | ClashAPIException | MissingFieldException ex) {
+            } catch (MissingFieldException ex) {
                 handle(ex, "");
             }
         }
 
-        return new Pair<Integer, List<Player>>(greatest, best);
+        return new Pair<Integer, List<Player>>(greatest, leaders);
     }
 
     private Pair<Integer, List<Player>> getHighestFromValueFunction(Function<Player, Integer> vf) {
         int greatest = 0;
-        List<Player> best = new ArrayList<>();
+        List<Player> leaders = new ArrayList<>();
 
-        for (ClanMember clanMember : clan.getMemberList()) {
+        for (Player player : clanMembers) {
             try {
-                Player player = clashAPI.getPlayer(clanMember.getTag());
                 int val = vf.apply(player);
                 if (val > greatest) {
                     greatest = val;
-                    best = new ArrayList<>();
-                    best.add(player);
+                    leaders = new ArrayList<>();
+                    leaders.add(player);
                 } else if (val == greatest) {
-                    best.add(player);
+                    leaders.add(player);
                 }
-            } catch (IOException | ClashAPIException | MissingFieldException ex) {
+            } catch (MissingFieldException ex) {
                 handle(ex, "");
             }
         }
 
-        return new Pair<>(greatest, best);
+        return new Pair<>(greatest, leaders);
     }
 
     public ClanLeaderboardHandler(ClashAPI clashAPI_, Clan clan_) {
         clashAPI = clashAPI_;
         clan = clan_;
+        clanMembers = new HashSet<>();
+
+        for(ClanMember clanMember : clan.getMemberList()) {
+            try {
+                Player player = clashAPI.getPlayer(clanMember.getTag());
+                clanMembers.add(player);
+            } catch (IOException | ClashAPIException | MissingFieldException ex) {
+                handle(ex, "");
+            }
+        }
     }
 
     // >>>> Current Leaderboards >>>>
@@ -242,30 +274,25 @@ public class ClanLeaderboardHandler {
 
     public Pair<Integer, List<Player>> getHighestLegendTrophies() {
         int greatest = 0;
-        List<Player> best = new ArrayList<>();
+        List<Player> leaders = new ArrayList<>();
 
-        for(ClanMember clanMember : clan.getMemberList()) {
+        for(Player player : clanMembers) {
             try {
-                Player player = clashAPI.getPlayer(clanMember.getTag());
                 PlayerLegendStatistics pls = player.getLegendStatistics();
                 if(pls != null) {
                     int val = pls.getLegendTrophies();
                     if(val > greatest) {
                         greatest = val;
-                        best = new ArrayList<>();
-                        best.add(player);
+                        leaders = new ArrayList<>();
+                        leaders.add(player);
                     }
                 }
-            } catch (IOException ex) {
-                handle(ex, "");
-            } catch (ClashAPIException ex) {
-                handle(ex, "");
             } catch (MissingFieldException ex) {
                 handle(ex, "");
             }
         }
 
-        return new Pair<Integer, List<Player>>(greatest, best);
+        return new Pair<Integer, List<Player>>(greatest, leaders);
     }
 
     public Pair<Integer, List<Player>> getHighestBuilderBaseTrophies() {
@@ -282,6 +309,45 @@ public class ClanLeaderboardHandler {
 
     public Pair<Integer, List<Player>> getMostDefenseWins() {
         return getHighestFromValueFunction(Player::getDefenseWins);
+    }
+
+    public Map<Integer, Pair<Integer, List<Player>>> getHighestEXPLvlPerThLevel() {
+        // <th, explvl>
+        Map<Integer, Integer> best = new HashMap<>();
+        // <th, <explvl, players>>
+        Map<Integer, Pair<Integer, List<Player>>> leaders = new HashMap<>();
+
+        for(int i = 1; i <= MAX_TOWN_HALL_LEVEL; ++i) {
+            best.put(i, 0);
+            leaders.put(i, null);
+        }
+
+        for(Player player : clanMembers) {
+            try {
+                int th = player.getTownHallLevel();
+                int explvl = player.getExpLevel();
+
+                if(!best.containsKey(th) || explvl > best.get(th)) {
+                    best.put(th, explvl);
+                    List<Player> playerList = new ArrayList<>();
+                    playerList.add(player);
+                    leaders.put(th, new Pair<>(explvl, playerList));
+                } else if (explvl == best.get(th)) {
+                    Pair<Integer, List<Player>> leaderInfo = leaders.get(th);
+                    if(leaderInfo == null) {
+                        List<Player> playerList = new ArrayList<>();
+                        playerList.add(player);
+                        leaders.put(th, new Pair<>(explvl, playerList));
+                    } else {
+                        leaders.get(th).getSecond().add(player);
+                    }
+                }
+            } catch (MissingFieldException ex) {
+                handle(ex, "");
+            }
+        }
+
+        return leaders;
     }
     // <<<< Current Leaderboards <<<<
 

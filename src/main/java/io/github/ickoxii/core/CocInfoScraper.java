@@ -254,7 +254,8 @@ class CocInfoScraper
 
             ClanLeaderboardHandler clh = new ClanLeaderboardHandler(clashAPI, clan);
 
-            clh.printLeaderboards(filePath);
+            clh.printLeaderboards(BASE_OUTPUT_PATH + "achievements/" + fileName);
+            clh.printEndSeasonRankings(BASE_OUTPUT_PATH + "season-rankings/mar24/" + fileName);
 
             endTime = System.nanoTime();
             totalDuration += scraper.printExecutionTime(startTime, endTime, "Execution time, leaderboard for " + clan.getName());

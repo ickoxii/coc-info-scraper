@@ -46,6 +46,7 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 import java.util.function.Function;
+import java.util.Comparator;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -111,6 +112,37 @@ public class ClanLeaderboardHandler {
         String playersList = leaders.getSecond().stream().map(Player::getName).collect(Collectors.joining(","));
         writer.write(achievement + "," + leaders.getFirst() + "," + playersList + System.lineSeparator());
         writer.flush();
+    }
+            
+    public void printEndSeasonRankings(String filePath) {
+        try (FileWriter writer = new FileWriter(filePath)) {
+            List<Player> clanMembersList = new ArrayList<>(clanMembers);
+            clanMembersList.sort(new Comparator<Player>() {
+                @Override
+                public int compare(Player p1, Player p2) {
+                    if (p1.getTownHallLevel() != p2.getTownHallLevel()) {
+                        return Integer.compare(p2.getTownHallLevel(), p1.getTownHallLevel());
+                    } else {
+                        return Integer.compare(p2.getTrophies(), p1.getTrophies());
+                    }
+                }
+            });
+
+            int currTh = -1;
+            for(Player player : clanMembersList) {
+                if(currTh != -1 && currTh != player.getTownHallLevel()) {
+                    writer.write("-----" + System.lineSeparator());
+                }
+                if(currTh != player.getTownHallLevel()) {
+                    writer.write("TownHall," + player.getTownHallLevel() + System.lineSeparator());
+                }
+                currTh = player.getTownHallLevel();
+                writer.write(player.getName() + "," + player.getTownHallLevel() + "," + player.getTrophies());
+                writer.write(System.lineSeparator());
+            }
+        } catch (IOException ex) {
+            handle(ex, "IOException getting end of season rankings");
+        }
     }
 
     public void printLeaderboards(String filePath) {
